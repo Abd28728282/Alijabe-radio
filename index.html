@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إذاعة الشيخ علي جابر</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* لإلغاء التحديد والتظليل عند الضغط على الأجهزة الذكية */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #1a2a6c, #b21f1f, #fdbb2d);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            overflow: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .player-card {
+            position: relative;
+            width: 350px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            color: #fff;
+        }
+
+        .img-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            padding: 5px;
+            background: linear-gradient(45deg, #f39c12, #d35400);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .img-container.playing {
+            animation: rotateImg 20s linear infinite;
+        }
+
+        @keyframes rotateImg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info h2 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        .info p {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 25px;
+        }
+
+        /* مؤشر موجات الصوت */
+        .visualizer {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 5px;
+            height: 30px;
+            margin-bottom: 25px;
+        }
+
+        .bar {
+            width: 4px;
+            height: 8px;
+            background: #f39c12;
+            border-radius: 3px;
+            transition: height 0.2s ease;
+        }
+
+        .visualizer.playing .bar {
+            animation: bounce 1.2s ease-in-out infinite alternate;
+        }
+
+        .visualizer.playing .bar:nth-child(1) { animation-delay: 0.1s; }
+        .visualizer.playing .bar:nth-child(2) { animation-delay: 0.4s; }
+        .visualizer.playing .bar:nth-child(3) { animation-delay: 0.2s; }
+        .visualizer.playing .bar:nth-child(4) { animation-delay: 0.5s; }
+        .visualizer.playing .bar:nth-child(5) { animation-delay: 0.3s; }
+
+        @keyframes bounce {
+            0% { height: 5px; }
+            100% { height: 28px; background: #e74c3c; }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .play-btn {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: #f39c12;
+            border: none;
+            outline: none; /* إلغاء الإطار عند التركيز */
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(243, 156, 18, 0.5);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* إلغاء الإطار الأزرق في متصفحات مختلفة عند النقر */
+        .play-btn:focus,
+        .play-btn:active {
+            outline: none;
+            border: none;
+            box-shadow: 0 0 20px rgba(243, 156, 18, 0.7);
+        }
+
+        .play-btn:hover {
+            transform: scale(1.08);
+            background: #e67e22;
+            box-shadow: 0 0 25px rgba(243, 156, 18, 0.8);
+        }
+
+        .volume-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .volume-container i {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            width: 100px;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.3);
+            outline: none; /* إلغاء الإطار الأزرق */
+        }
+
+        .volume-slider:focus {
+            outline: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #f39c12;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="player-card">
+        <div class="img-container" id="imgContainer">
+            <img src="https://i.ibb.co/ZzFFQdKD/image.jpg" alt="الشيخ علي جابر">
+        </div>
+
+        <div class="info">
+            <h2>الشيخ علي جابر</h2>
+            <p>إذاعة القرآن الكريم - بث مباشر</p>
+        </div>
+
+        <div class="visualizer" id="visualizer">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+
+        <div class="controls">
+            <button class="play-btn" id="playBtn">
+                <i class="fas fa-play" id="playIcon"></i>
+            </button>
+        </div>
+
+        <div class="volume-container">
+            <i class="fas fa-volume-down"></i>
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="0.8">
+            <i class="fas fa-volume-up"></i>
+        </div>
+    </div>
+
+    <audio id="audioPlayer" src="https://qurango.net/radio/ali_jaber?1789737689138" preload="none"></audio>
+
+    <script>
+        const audio = document.getElementById('audioPlayer');
+        const playBtn = document.getElementById('playBtn');
+        const playIcon = document.getElementById('playIcon');
+        const imgContainer = document.getElementById('imgContainer');
+        const visualizer = document.getElementById('visualizer');
+        const volumeSlider = document.getElementById('volumeSlider');
+
+        let isPlaying = false;
+
+        playBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                audio.pause();
+                playIcon.classList.remove('fa-pause');
+                playIcon.classList.add('fa-play');
+                imgContainer.classList.remove('playing');
+                visualizer.classList.remove('playing');
+            } else {
+                audio.play();
+                playIcon.classList.remove('fa-play');
+                playIcon.classList.add('fa-pause');
+                imgContainer.classList.add('playing');
+                visualizer.classList.add('playing');
+            }
+            isPlaying = !isPlaying;
+        });
+
+        volumeSlider.addEventListener('input', (e) => {
+            audio.volume = e.target.value;
+        });
+    </script>
+</body>
+</html>
