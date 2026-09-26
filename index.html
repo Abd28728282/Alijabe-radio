@@ -21,54 +21,96 @@
             justify-content: center;
             align-items: center;
         }
+        .player-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
         video {
             width: 100vw;
             height: 100vh;
-            object-fit: contain; /* أبعاد فيديو متناسقة أو استخدم cover لملء كامل الشاشة تماماً */
+            object-fit: contain;
             background-color: #000;
+        }
+        /* إشعار شفاف ينبه المستخدم لتفعيل الصوت إذا تم كتمه تلقائياً */
+        .unmute-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.75);
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-family: system-ui, sans-serif;
+            cursor: pointer;
+            z-index: 99;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
         }
     </style>
 </head>
 <body>
 
-    <video id="videoPlayer" controls playsinline></video>
+    <div class="player-container" onclick="enableAudio()">
+        <div id="unmuteBtn" class="unmute-overlay">
+            🔊 اضغط هنا لتفعيل الصوت
+        </div>
+        <video id="videoPlayer" playsinline autoplay muted></video>
+    </div>
 
     <script>
+        var videoElement = document.querySelector("#videoPlayer");
+        var unmuteBtn = document.querySelector("#unmuteBtn");
+
         document.addEventListener("DOMContentLoaded", function () {
             var streamUrl = "https://video.fsdv1-2.fna.fbcdn.net/hvideo-cco-atn/_nc_cat-1/_nc_sr_t-4/v/rASfdXiN3Wn3w7458hESITNwhDU2CjyT7YjHAPs3mEm7CUQ/_nc_ohc-ZQ9bP6l91DoQ7kNvwH2C9Qc/live-dash/dash-abr-ibr-audio/1082049241245186.mpd?_nc_zt=28&ccb=2-4&ms=m_CTPA&sc_t=1&oh=00_AQJRsNMDLr7CyGoR1DX8zWGpJX_K_-RwviuObFuJ87jSFw&oe=6AB9C0C0";
-            var videoElement = document.querySelector("#videoPlayer");
 
             var player = dashjs.MediaPlayer().create();
 
-            // إعدادات السرعة وتقليل التأخير
+            // ضبط إعدادات السرعة العالية والتأخير المنخفض جداً
             player.updateSettings({
                 'streaming': {
-                    'delay': {
-                        'liveDelay': 1.5
-                    },
+                    'delay': { 'liveDelay': 1.0 },
                     'buffer': {
                         'fastSwitchEnabled': true,
-                        'bufferTimeAtTopQuality': 5,
-                        'stableBufferTime': 3
-                    },
-                    'abr': {
-                        'autoSwitchBitrate': { 'video': true }
+                        'bufferTimeAtTopQuality': 3,
+                        'stableBufferTime': 2
                     }
                 }
             });
 
             player.initialize(videoElement, streamUrl, true);
 
-            // إجبار تشغيل الصوت والفيديو فوراً
+            // محاولة تشغيل الصوت تلقائياً (تنجح في WebView والمتصفحات المساندة)
             videoElement.muted = false;
             var playPromise = videoElement.play();
-            
+
             if (playPromise !== undefined) {
-                playPromise.catch(function(error) {
-                    console.log("تنبيه: يتطلب الـ WebView السماح بالـ Autoplay مع الصوت من كود التطبيق الأساسي.");
+                playPromise.then(function() {
+                    // إذا نجح المتصفح في تشغيل الصوت تلقائياً نُخفي زر الصوت
+                    if (!videoElement.muted) {
+                        unmuteBtn.style.display = 'none';
+                    }
+                }).catch(function() {
+                    // إذا رفض المتصفح الصوت، نكتُم الصوت مؤقتاً لتشغيل الفيديو فورا بدون تأخير
+                    videoElement.muted = true;
+                    videoElement.play();
+                    unmuteBtn.style.display = 'flex';
                 });
             }
         });
+
+        // دالة تفعيل الصوت عند أول نقرة على أي مكان في الشاشة
+        function enableAudio() {
+            if (videoElement.muted) {
+                videoElement.muted = false;
+                unmuteBtn.style.display = 'none';
+            }
+        }
     </script>
 
 </body>
